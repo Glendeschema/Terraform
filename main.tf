@@ -3,21 +3,10 @@ provider "azurerm" {
   features  {}
 }
 
-variable "counts" {
-  default = 1 
-}
-
-variable "resourcename" {
-  default = "terraformtest"
-}
-
-variable accountpass {
-  default = "Password2020"
-}
-
-variable "accountusername" {
-  default = "schema"
-}
+variable "username" {}
+variable "accountpass" {}
+variable "resourcename" {}
+variable "counts" {}
 
 
 resource "azurerm_resource_group" "rg" {
