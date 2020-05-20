@@ -4,12 +4,24 @@ provider "azurerm" {
 }
 
 variable "counts" {
-  default = 3
+  default = 1 
+}
+
+variable "resourcename" {
+  default = "terraformtest"
+}
+
+variable accountpass {
+  default = "Password2020"
+}
+
+variable "accountusername" {
+  default = "schema"
 }
 
 
 resource "azurerm_resource_group" "rg" {
-  name     = "terraform-rg1"
+  name     = "${var.resourcename}"
   location = "north europe"
   tags = {
     enviroment = "demo"
@@ -18,7 +30,7 @@ resource "azurerm_resource_group" "rg" {
 
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "terraform-vnet"
+  name                = "${var.resourcename}"
   location            = "${azurerm_resource_group.rg.location}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
   address_space       = ["192.168.0.0/16"]
@@ -28,15 +40,15 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  name                 = "terraform-net1"
+  name                 = "${var.resourcename}"
   resource_group_name  = "${azurerm_resource_group.rg.name}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
   address_prefix       = "192.168.1.0/24"
 }
 
 resource "azurerm_public_ip" "ipaddress" {
-  count = "${var.counts}"
-  name                = "terraformip${count.index}"
+  count               = "${var.counts}"
+  name                = "${var.resourcename}${count.index}"
   location            = "${azurerm_resource_group.rg.location}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
   allocation_method   = "Dynamic"
@@ -46,8 +58,8 @@ resource "azurerm_public_ip" "ipaddress" {
 }
 
 resource "azurerm_network_security_group" "nsg" {
-  count = "${var.counts}"
-  name                = "terraformnic${count.index}"
+  count               = "${var.counts}"
+  name                = "${var.resourcename}${count.index}"
   location            = "${azurerm_resource_group.rg.location}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
 
@@ -70,8 +82,8 @@ resource "azurerm_network_security_group" "nsg" {
 }
 
 resource "azurerm_network_interface" "nic" {
-  count = "${var.counts}"
-  name                = "terraformnic${count.index}"
+  count               = "${var.counts}"
+  name                = "${var.resourcename}${count.index}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = "${azurerm_resource_group.rg.name}"
   ip_configuration {
@@ -90,14 +102,14 @@ resource "azurerm_network_interface" "nic" {
 #connecting the nic id to the security Id - association
 
 resource "azurerm_network_interface_security_group_association" "example" {
-  count = "${var.counts}"
+  count                     = "${var.counts}"
   network_interface_id      = "${azurerm_network_interface.nic.*.id[count.index]}"
   network_security_group_id = "${azurerm_network_security_group.nsg.*.id[count.index]}"
 }
 
 resource "azurerm_storage_account" "storageaccount" {
   count = "${var.counts}"
-  name                     = "terraform${count.index}store"
+  name                     = "${var.resourcename}${count.index}store"
   location                 = azurerm_resource_group.rg.location
   account_replication_type = "LRS"
   resource_group_name      = azurerm_resource_group.rg.name
@@ -116,14 +128,14 @@ variable "var" {
 
 resource "azurerm_linux_virtual_machine" "vm" {
   count = "${var.counts}"
-  name                  = "terraformvm${count.index}"
+  name                  = "${var.resourcename}${count.index}"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids =  ["${azurerm_network_interface.nic.*.id[count.index]}"]
   size                  = "Standard_B1MS"
 
   os_disk {
-    name                 = "server-${count.index}-os"
+    name                 = "${var.resourcename}-${count.index}-os"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -136,10 +148,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 
 
-  computer_name                   = "server-${count.index}-os"
-  admin_username                  = "schema"
+  computer_name                   = "${var.resourcename}-${count.index}-os"
+  admin_username                  = "${var.username}"
   disable_password_authentication = false
-  admin_password = "Morolong1993"
+  admin_password = "${var.accountpass}"
   
 
 
