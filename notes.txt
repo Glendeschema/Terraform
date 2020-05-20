@@ -1,0 +1,42 @@
+Where to start :)
+
+creating multiple resources in terraform
+
+* first , you cant use count index without defining count variable in the 
+  resouce.to make it easy i have created a separate variables file and 
+  inserted counts = 1 then declare   count  = "${var.counts}" inside the resources
+* count  = "${var.counts}" has to be inserted in every resource to be cloned
+* To create distinct resource names , we use ${copy.index} that will
+  remember the count number as it creates resources . see below declaration.
+    name = "${var.resourcename}${count.index}store" 
+* for resources that needs to link using resource IDs , count index is referenced in
+  a funny way. see below example. 
+   network_security_group_id = "${azurerm_network_security_group.nsg.*.id[count.index]}"
+  -  this portion does magic to allow count on index *.id[count.index] . use it 
+     to all resources that need resourceID
+
+
+Declaring non-changible variables
+
+* to keep the main.tf file short and simple , create a separate file
+  with extension of .tfvars 
+* variables are declared in this manner shown below
+  
+  variablename = key
+
+* you will need to declare the variable place holder inside 
+  main.tf doc for this to work. yeah boring!!!!!!
+
+  variable "var" {} - leave this empty as value is stored in the tsvars file
+
+* rule of thumb , passwords are not advisable to be hardcoded into 
+  main.tf or any file that will be checked into source control
+  - rather create a declaration as shown above and use -var when creating the 
+    resource
+
+    terraform apply -var 'password=key'
+
+  - when passing a variables tfvars file use the below example.
+   
+   terraform apply -var-file 'filepath' - you can specify multiple files for ease
+
