@@ -1,0 +1,13 @@
+Creating a new branch
+
+* git checkout -b branch name
+
+to push to repo 
+    - git push localrepo branch name
+
+* to merge to master , use below. it works ....
+git checkout master
+git pull origin master
+git merge test
+git push origin maste
+
