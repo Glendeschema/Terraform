@@ -11,3 +11,11 @@ git pull origin master
 git merge test
 git push origin maste
 
+
+
+to remove files from cache / exisiting files on local repo
+git rm --cached filename
+
+then commit previous message
+git commit --amend -CHEAD  
+
